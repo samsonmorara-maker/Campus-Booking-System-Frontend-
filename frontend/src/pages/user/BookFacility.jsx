@@ -1,11 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 function BookFacility() {
   const [facility, setFacility] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [facilities, setFacilities]=useState([])
 
+  useEffect(() => {
+  axios
+    .get("http://127.0.0.1:5000/facilities")
+    .then((response) => {
+      setFacilities(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}, []);
   return (
     <div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md">
       <h1 className="text-2xl font-bold mb-6">
@@ -22,6 +34,14 @@ function BookFacility() {
             onChange={(e) => setFacility(e.target.value)}
           >
             <option value="">Select Facility</option>
+
+            {facilities.map((facility) => (
+                <option
+                key={facility.id}
+                value={facility.id}>
+                 {facility.name}
+            </option>
+                ))}
           </select>
         </div>
         <div>
