@@ -16,7 +16,7 @@ function MyBookings() {
   const fetchBookings = async()=>{
     try{
       const response = await axios.get(
-        `http://127.0.0.1:5000/bookings/${userId}`
+        `https://campus-booking-system-backend.onrender.com/api/bookings/${userId}`
       );
       setBookings(response.data);
     }catch(error){
@@ -31,7 +31,7 @@ function MyBookings() {
   const handleCancel = async(id)=>{
     try{
       await axios.patch(
-        `http://127.0.0.1:5000/bookings/${id}/cancel`
+        `https://campus-booking-system-backend.onrender.com/api/bookings/${id}/cancel`
       );
       fetchBookings();
     }catch(error){

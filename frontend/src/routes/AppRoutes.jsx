@@ -5,6 +5,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+
 import Profile from "../pages/user/Profile";
 import Facilities from "../pages/user/Facilities";
 import FacilityDetails from "../pages/user/FacilityDetails";
@@ -24,12 +25,12 @@ import Settings from "../pages/admin/Settings";
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public */}
+      {/* Public Routes */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Student */}
+      {/* Student Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
@@ -41,7 +42,7 @@ const AppRoutes = () => {
         <Route path="/schedule" element={<ClassSchedule />} />
       </Route>
 
-      {/* Admin */}
+      {/* Admin Protected Routes */}
       <Route element={<ProtectedRoute requiredRole="admin" />}>
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/bookings" element={<ManageBookings />} />
@@ -52,6 +53,7 @@ const AppRoutes = () => {
         <Route path="/admin/settings" element={<Settings />} />
       </Route>
 
+      {/* 404 */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

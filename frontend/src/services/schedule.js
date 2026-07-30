@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://campus-booking-system-backend.onrender.com";
 
 
 // Get all schedules

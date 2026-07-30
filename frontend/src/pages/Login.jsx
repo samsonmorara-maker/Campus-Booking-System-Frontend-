@@ -25,23 +25,28 @@ const Login = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+  event.preventDefault();
 
-    setError("");
-    setLoading(true);
+  setError("");
+  setLoading(true);
 
-    try {
-      await login(formData);
+  try {
+    const response = await login(formData);
+
+    if (response.user.role === "admin") {
+      navigate("/admin/dashboard");
+    } else {
       navigate("/dashboard");
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        "Invalid email or password."
-      );
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err) {
+    setError(
+      err.response?.data?.message ||
+      "Invalid email or password."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4">

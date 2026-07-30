@@ -20,7 +20,7 @@ function BookFacility() {
   const fetchFacilities = async () => {
     try {
       const response = await axios.get(
-        "http://127.0.0.1:5000/facilities"
+        "https://campus-booking-system-backend.onrender.com/facilities"
       );
 
       setFacilities(response.data);
@@ -52,7 +52,7 @@ function BookFacility() {
 
     try {
       await axios.post(
-        "http://127.0.0.1:5000/bookings",
+        "https://campus-booking-system-backend.onrender.com/bookings",
         bookingData
       );
 

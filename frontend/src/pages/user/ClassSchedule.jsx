@@ -15,7 +15,7 @@ fetchSchedules();
 const fetchSchedules=async()=>{
 try{
 const response = await axios.get(
-"http://127.0.0.1:5000/schedules"
+"https://campus-booking-system-backend.onrender.com/schedules"
 );
 setSchedules(response.data);
 }catch(error){
@@ -25,7 +25,7 @@ console.error(error);
 const filterSchedules=async()=>{
 try{
 const response=await axios.get(
-"http://127.0.0.1:5000/schedules/filter",
+"https://campus-booking-system-backend.onrender.com/schedules/filter",
 {
 params:{
 day:day,
