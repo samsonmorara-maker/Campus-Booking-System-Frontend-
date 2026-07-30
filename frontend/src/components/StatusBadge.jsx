@@ -1,20 +1,21 @@
-function StatusBadge({ status }) {
-  const colors = {
-    Pending: "bg-[#F59E0B] text-white",
-    Approved: "bg-[#22C55E] text-white",
-    Rejected: "bg-[#EF4444] text-white",
-    Cancelled: "bg-gray-500 text-white",
-  };
+const styles = {
+  pending: "bg-amber-50 text-amber-700 border border-amber-200",
+  approved: "bg-green-50 text-green-700 border border-green-200",
+  rejected: "bg-red-50 text-red-700 border border-red-200",
+  cancelled: "bg-gray-100 text-gray-700 border border-gray-300",
+};
+
+export default function StatusBadge({ status }) {
+  const normalizedStatus = status?.toLowerCase();
 
   return (
     <span
-      className={`px-4 py-2 rounded-full text-sm font-semibold ${
-        colors[status] || "bg-gray-300 text-black"
+      className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${
+        styles[normalizedStatus] ||
+        "bg-gray-100 text-gray-700 border border-gray-300"
       }`}
     >
       {status}
     </span>
   );
 }
-
-export default StatusBadge;

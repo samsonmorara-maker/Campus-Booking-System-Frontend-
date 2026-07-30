@@ -3,8 +3,8 @@ import { Navigate, Outlet } from "react-router-dom";
 import Loader from "./Loader";
 import useAuth from "../hooks/useAuth";
 
-const ProtectedRoute = () => {
-  const { loading, isAuthenticated } = useAuth();
+const ProtectedRoute = ({ requiredRole }) => {
+  const { loading, isAuthenticated, user } = useAuth();
 
   if (loading) {
     return <Loader />;
@@ -12,6 +12,10 @@ const ProtectedRoute = () => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && user?.role !== requiredRole) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

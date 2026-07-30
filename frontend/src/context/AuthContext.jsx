@@ -1,6 +1,5 @@
 import {
   createContext,
-  useContext,
   useEffect,
   useState,
 } from "react";
@@ -27,7 +26,6 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await AuthService.getProfile();
-
       setUser(response.user);
     } catch (error) {
       localStorage.removeItem("access_token");
@@ -84,4 +82,5 @@ export function AuthProvider({ children }) {
   );
 }
 
+export { AuthContext };
 export default AuthContext;
