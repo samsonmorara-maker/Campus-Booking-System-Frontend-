@@ -6,6 +6,7 @@ import ManageUsers from "./pages/admin/ManageUsers";
 import Reports from "./pages/admin/Reports";
 import ManageFacilities from "./pages/admin/ManageFacilities";
 import ManageSchedules from "./pages/admin/ManageSchedules";
+import Settings from "./pages/admin/Settings";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/admin/reports" element={<Reports />} />
           <Route path="/admin/facilities" element={<ManageFacilities />} />
           <Route path="/admin/schedules" element={<ManageSchedules />} />
+          <Route path="/admin/settings" element={<Settings />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

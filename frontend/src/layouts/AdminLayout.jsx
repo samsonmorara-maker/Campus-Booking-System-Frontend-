@@ -1,5 +1,6 @@
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import AdminSidebar from "../components/AdminSidebar";
+import NotificationBell from "../components/NotificationBell";
 
 export default function AdminLayout({ children }) {
   return (
@@ -18,12 +19,7 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-5">
-            <button className="relative">
-              <Bell size={20} className="text-gray-600" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                3
-              </span>
-            </button>
+            <NotificationBell />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
                 A
