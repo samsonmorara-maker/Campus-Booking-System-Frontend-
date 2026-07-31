@@ -1,15 +1,14 @@
-import {
-  createContext,
-  useEffect,
-  useState,
-} from "react";
-
+import { createContext, useEffect, useState } from "react";
 import AuthService from "../services/auth";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,9 +25,19 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await AuthService.getProfile();
+
       setUser(response.user);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.user)
+      );
     } catch (error) {
+      console.error(error);
+
       localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+
       setUser(null);
     } finally {
       setLoading(false);
@@ -43,6 +52,11 @@ export function AuthProvider({ children }) {
       response.access_token
     );
 
+    localStorage.setItem(
+      "user",
+      JSON.stringify(response.user)
+    );
+
     setUser(response.user);
 
     return response;
@@ -54,6 +68,8 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+
     setUser(null);
   };
 
@@ -61,6 +77,11 @@ export function AuthProvider({ children }) {
     const response = await AuthService.updateProfile(data);
 
     setUser(response.user);
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(response.user)
+    );
 
     return response;
   };
@@ -82,5 +103,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-export { AuthContext };
 export default AuthContext;

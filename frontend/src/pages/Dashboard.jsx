@@ -30,8 +30,9 @@ export default function Dashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const userData = localStorage.getItem("user");
+      // Read the correct keys
+      const token = localStorage.getItem("access_token");
+      const userString = localStorage.getItem("user");
 
       if (!token) {
         console.error("No authentication token found.");
@@ -39,27 +40,29 @@ export default function Dashboard() {
         return;
       }
 
-      if (!userData) {
-        console.error("No user data found.");
+      if (!userString) {
+        console.error("No user information found.");
         navigate("/login");
         return;
       }
 
-      const user = JSON.parse(userData);
+      const user = JSON.parse(userString);
 
-      if (!user?.id) {
-        console.error("Invalid user object.");
+      if (!user || !user.id) {
+        console.error("Invalid user data.");
         navigate("/login");
         return;
       }
 
-      const headers = {
-        Authorization: `Bearer ${token}`,
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       };
 
       const [facilitiesRes, bookingsRes] = await Promise.all([
-        axios.get(`${API_URL}/facilities`, { headers }),
-        axios.get(`${API_URL}/bookings/${user.id}`, { headers }),
+        axios.get(`${API_URL}/facilities`, config),
+        axios.get(`${API_URL}/bookings/${user.id}`, config),
       ]);
 
       const facilities = Array.isArray(facilitiesRes.data)
@@ -74,17 +77,17 @@ export default function Dashboard() {
         facilities: facilities.length,
         bookings: bookings.length,
         pending: bookings.filter(
-          (b) => b.status === "Pending"
+          (booking) => booking.status === "Pending"
         ).length,
         approved: bookings.filter(
-          (b) => b.status === "Approved"
+          (booking) => booking.status === "Approved"
         ).length,
       });
     } catch (error) {
       console.error("Dashboard Error:", error);
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("access_token");
         localStorage.removeItem("user");
         navigate("/login");
       }
@@ -153,7 +156,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <p className="text-lg font-semibold text-gray-600">
           Loading dashboard...
         </p>
@@ -169,6 +172,7 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold">
             Student Dashboard
           </h1>
+
           <p className="mt-2 text-blue-100">
             Welcome to the Campus Facility Booking System
           </p>
@@ -176,7 +180,6 @@ export default function Dashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-10">
-
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {statCards.map((card) => {
@@ -188,10 +191,7 @@ export default function Dashboard() {
                 className="bg-white rounded-xl shadow p-6 flex justify-between items-center"
               >
                 <div>
-                  <p className="text-gray-500">
-                    {card.title}
-                  </p>
-
+                  <p className="text-gray-500">{card.title}</p>
                   <h2 className="text-3xl font-bold mt-2">
                     {card.value}
                   </h2>
@@ -248,35 +248,34 @@ export default function Dashboard() {
 
           <div className="space-y-3 text-gray-700">
             <p>
-               Available Facilities:
+              Available Facilities:
               <span className="font-semibold ml-2">
                 {stats.facilities}
               </span>
             </p>
 
             <p>
-               Total Bookings:
+              Total Bookings:
               <span className="font-semibold ml-2">
                 {stats.bookings}
               </span>
             </p>
 
             <p>
-               Pending Requests:
+              Pending Requests:
               <span className="font-semibold ml-2 text-yellow-600">
                 {stats.pending}
               </span>
             </p>
 
             <p>
-               Approved Bookings:
+              Approved Bookings:
               <span className="font-semibold ml-2 text-green-600">
                 {stats.approved}
               </span>
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );
