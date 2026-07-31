@@ -1,12 +1,69 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import {
   Building2,
   CalendarDays,
   BookOpen,
   User,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    facilities: 0,
+    bookings: 0,
+    pending: 0,
+    approved: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const [facilitiesRes, bookingsRes] = await Promise.all([
+        axios.get(`${API_URL}/facilities`, {
+          headers,
+        }),
+        axios.get(`${API_URL}/bookings/${user.id}`, {
+          headers,
+        }),
+      ]);
+
+      const bookings = bookingsRes.data;
+
+      setStats({
+        facilities: facilitiesRes.data.length,
+        bookings: bookings.length,
+        pending: bookings.filter(
+          (b) => b.status === "Pending"
+        ).length,
+        approved: bookings.filter(
+          (b) => b.status === "Approved"
+        ).length,
+      });
+    } catch (error) {
+      console.error("Dashboard Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const cards = [
     {
       title: "Browse Facilities",
@@ -17,43 +74,113 @@ export default function Dashboard() {
     },
     {
       title: "Book a Facility",
-      description: "Reserve a facility for your activities.",
+      description: "Reserve a campus facility.",
       icon: CalendarDays,
       path: "/facilities",
       color: "bg-green-500",
     },
     {
       title: "My Bookings",
-      description: "View and manage your bookings.",
+      description: "Track your reservations.",
       icon: BookOpen,
       path: "/my-bookings",
       color: "bg-purple-500",
     },
     {
       title: "Profile",
-      description: "View and edit your account.",
+      description: "Update your account.",
       icon: User,
       path: "/profile",
       color: "bg-orange-500",
     },
   ];
 
+  const statCards = [
+    {
+      title: "Facilities",
+      value: stats.facilities,
+      icon: Building2,
+      color: "bg-blue-500",
+    },
+    {
+      title: "Bookings",
+      value: stats.bookings,
+      icon: BookOpen,
+      color: "bg-purple-500",
+    },
+    {
+      title: "Pending",
+      value: stats.pending,
+      icon: Clock,
+      color: "bg-yellow-500",
+    },
+    {
+      title: "Approved",
+      value: stats.approved,
+      icon: CheckCircle,
+      color: "bg-green-500",
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <p className="text-lg font-medium text-gray-600">
+          Loading dashboard...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <div className="bg-blue-700 text-white py-8 shadow">
-        <div className="max-w-7xl mx-auto px-6">
+      <div className="bg-blue-700 text-white shadow">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <h1 className="text-4xl font-bold">
             Student Dashboard
           </h1>
+
           <p className="mt-2 text-blue-100">
-            Welcome to the Campus Facility Booking System.
+            Welcome to the Campus Facility Booking System
           </p>
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* Statistics */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {statCards.map((card) => {
+            const Icon = card.icon;
+
+            return (
+              <div
+                key={card.title}
+                className="bg-white rounded-xl shadow p-6 flex justify-between items-center"
+              >
+                <div>
+                  <p className="text-gray-500">
+                    {card.title}
+                  </p>
+
+                  <h2 className="text-3xl font-bold mt-2">
+                    {card.value}
+                  </h2>
+                </div>
+
+                <div
+                  className={`${card.color} w-14 h-14 rounded-full flex justify-center items-center text-white`}
+                >
+                  <Icon size={28} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Quick Actions */}
+
         <h2 className="text-2xl font-semibold mb-6">
           Quick Actions
         </h2>
@@ -86,19 +213,42 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* Information Section */}
+        {/* Overview */}
+
         <div className="mt-10 bg-white rounded-xl shadow p-6">
           <h2 className="text-2xl font-semibold mb-4">
-            Getting Started
+            Booking Overview
           </h2>
 
-          <ul className="space-y-3 list-disc list-inside text-gray-700">
-            <li>Browse available campus facilities.</li>
-            <li>Book facilities for your activities.</li>
-            <li>Monitor the status of your bookings.</li>
-            <li>View the class schedule.</li>
-            <li>Manage your profile information.</li>
-          </ul>
+          <div className="space-y-3 text-gray-700">
+            <p>
+              📚 Available Facilities:
+              <span className="font-semibold ml-2">
+                {stats.facilities}
+              </span>
+            </p>
+
+            <p>
+              📅 Total Bookings:
+              <span className="font-semibold ml-2">
+                {stats.bookings}
+              </span>
+            </p>
+
+            <p>
+              ⏳ Pending Requests:
+              <span className="font-semibold ml-2 text-yellow-600">
+                {stats.pending}
+              </span>
+            </p>
+
+            <p>
+              ✅ Approved Bookings:
+              <span className="font-semibold ml-2 text-green-600">
+                {stats.approved}
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
