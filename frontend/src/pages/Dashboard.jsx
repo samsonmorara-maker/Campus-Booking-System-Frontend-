@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Building2,
@@ -13,6 +13,8 @@ import {
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
     facilities: 0,
     bookings: 0,
@@ -29,26 +31,47 @@ export default function Dashboard() {
   const fetchDashboard = async () => {
     try {
       const token = localStorage.getItem("token");
+      const userData = localStorage.getItem("user");
 
-      const user = JSON.parse(localStorage.getItem("user"));
+      if (!token) {
+        console.error("No authentication token found.");
+        navigate("/login");
+        return;
+      }
+
+      if (!userData) {
+        console.error("No user data found.");
+        navigate("/login");
+        return;
+      }
+
+      const user = JSON.parse(userData);
+
+      if (!user?.id) {
+        console.error("Invalid user object.");
+        navigate("/login");
+        return;
+      }
 
       const headers = {
         Authorization: `Bearer ${token}`,
       };
 
       const [facilitiesRes, bookingsRes] = await Promise.all([
-        axios.get(`${API_URL}/facilities`, {
-          headers,
-        }),
-        axios.get(`${API_URL}/bookings/${user.id}`, {
-          headers,
-        }),
+        axios.get(`${API_URL}/facilities`, { headers }),
+        axios.get(`${API_URL}/bookings/${user.id}`, { headers }),
       ]);
 
-      const bookings = bookingsRes.data;
+      const facilities = Array.isArray(facilitiesRes.data)
+        ? facilitiesRes.data
+        : [];
+
+      const bookings = Array.isArray(bookingsRes.data)
+        ? bookingsRes.data
+        : [];
 
       setStats({
-        facilities: facilitiesRes.data.length,
+        facilities: facilities.length,
         bookings: bookings.length,
         pending: bookings.filter(
           (b) => b.status === "Pending"
@@ -59,6 +82,12 @@ export default function Dashboard() {
       });
     } catch (error) {
       console.error("Dashboard Error:", error);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
     } finally {
       setLoading(false);
     }
@@ -124,8 +153,8 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center">
-        <p className="text-lg font-medium text-gray-600">
+      <div className="min-h-screen flex justify-center items-center bg-gray-100">
+        <p className="text-lg font-semibold text-gray-600">
           Loading dashboard...
         </p>
       </div>
@@ -140,7 +169,6 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold">
             Student Dashboard
           </h1>
-
           <p className="mt-2 text-blue-100">
             Welcome to the Campus Facility Booking System
           </p>
@@ -148,8 +176,8 @@ export default function Dashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* Statistics */}
 
+        {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {statCards.map((card) => {
             const Icon = card.icon;
@@ -170,7 +198,7 @@ export default function Dashboard() {
                 </div>
 
                 <div
-                  className={`${card.color} w-14 h-14 rounded-full flex justify-center items-center text-white`}
+                  className={`${card.color} w-14 h-14 rounded-full flex items-center justify-center text-white`}
                 >
                   <Icon size={28} />
                 </div>
@@ -180,7 +208,6 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-
         <h2 className="text-2xl font-semibold mb-6">
           Quick Actions
         </h2>
@@ -213,8 +240,7 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* Overview */}
-
+        {/* Booking Overview */}
         <div className="mt-10 bg-white rounded-xl shadow p-6">
           <h2 className="text-2xl font-semibold mb-4">
             Booking Overview
@@ -222,34 +248,35 @@ export default function Dashboard() {
 
           <div className="space-y-3 text-gray-700">
             <p>
-              📚 Available Facilities:
+               Available Facilities:
               <span className="font-semibold ml-2">
                 {stats.facilities}
               </span>
             </p>
 
             <p>
-              📅 Total Bookings:
+               Total Bookings:
               <span className="font-semibold ml-2">
                 {stats.bookings}
               </span>
             </p>
 
             <p>
-              ⏳ Pending Requests:
+               Pending Requests:
               <span className="font-semibold ml-2 text-yellow-600">
                 {stats.pending}
               </span>
             </p>
 
             <p>
-              ✅ Approved Bookings:
+               Approved Bookings:
               <span className="font-semibold ml-2 text-green-600">
                 {stats.approved}
               </span>
             </p>
           </div>
         </div>
+
       </div>
     </div>
   );
